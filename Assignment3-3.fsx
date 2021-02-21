@@ -54,8 +54,6 @@ arithEval arithSingleLetterScore hello (Map.ofList [("_pos_", 4); ("_acc_",42)])
 arithEval arithDoubleLetterScore hello (Map.ofList [("_pos_", 4); ("_acc_",0)])
 arithEval arithDoubleLetterScore hello (Map.ofList [("_pos_", 4); ("_acc_",42)])
 arithEval arithTripleLetterScore hello (Map.ofList [("_pos_", 4); ("_acc_",0)])
-arithEval arithTripleLetterScore hello (Map.ofList [("_pos_", 4); ("_acc_",42)])
-arithEval arithDoubleWordScore hello (Map.ofList [("_acc_",1)])
 
 
 type cExp =
@@ -64,7 +62,20 @@ type cExp =
    | ToLower of cExp (* Converts upper case to lower case character, non characters unchanged *)
    | CV of aExp      (* Character lookup at word index *)
 
-let rec charEval cExp = failwith "not implemented"
+let rec charEval (c: cExp) (w: word) (s: state) =
+    match c with 
+    | C c -> c
+    | ToUpper c -> System.Char.ToUpper(charEval c w s )
+    | ToLower c -> System.Char.ToLower(charEval c w s)
+    | CV c -> fst(w.[arithEval c w s])
+
+charEval (C 'H') [] Map.empty
+charEval (ToLower (CV (N 0))) hello Map.empty
+charEval (ToUpper (C 'h')) [] Map.empty
+charEval (ToLower (C '*')) [] Map.empty
+charEval (CV (V "x" .-. N 1)) hello (Map.ofList [("x", 5)])
+
+
 
 type bExp =             
    | TT                   (* true *)
@@ -91,7 +102,27 @@ let (.>=.) a b = ~~(a .<. b)                (* numeric greater than or equal to 
 let (.>.) a b = ~~(a .=. b) .&&. (a .>=. b) (* numeric greater than *)
 
 
-let rec boolEval bExp = failwith "not implemented"
+let rec boolEval (b: bExp) (w: word) (s:state) = 
+    match b with 
+    | b when b = TT -> true
+    | b when b = FF -> false
+    | AEq (a,b) -> (arithEval a w s) = (arithEval b w s)
+    | ALt (a,b) -> (arithEval a w s) < (arithEval b w s)
+    | Not b -> not (boolEval b w s)
+    | Conj (a,b) -> (boolEval a w s) && (boolEval b w s)
+    | IsLetter b -> System.Char.IsLetter(charEval b w s)
+    | IsDigit b -> System.Char.IsDigit(charEval b w s)
+
+
+boolEval TT [] Map.empty;;
+boolEval FF [] Map.empty;;
+boolEval ((V "x" .+. V "y") .=. (V "y" .+. V "x")) [] (Map.ofList [("x", 5); ("y", 7)]);
+boolEval ((V "x" .+. V "y") .=. (V "y" .-. V "x"))[] (Map.ofList [("x", 5); ("y", 7)]);;
+boolEval (IsLetter (CV (V "x"))) hello (Map.ofList [("x", 4)]);;
+boolEval (IsLetter (CV (V "x"))) (('1', 0)::hello) (Map.ofList [("x", 0)]);;
+boolEval (IsDigit (CV (V "x"))) hello (Map.ofList [("x", 4)]);;
+boolEval (IsDigit (CV (V "x"))) (('1', 0)::hello) (Map.ofList [("x", 0)]);;
+
 
 type stmnt =
    | Skip                        (* does nothing *)
@@ -100,34 +131,60 @@ type stmnt =
    | ITE of bExp * stmnt * stmnt (* if-then-else statement *)    
    | While of bExp * stmnt       (* while statement *)
 
-let rec evalStmnt stm = failwith "not implemented"
+let rec evalStmnt (stm: stmnt) (w: word) (s: state) = 
+    match stm with
+    | Skip -> s
+    | Ass (x, a) -> s.Add(x, (arithEval a w s))
+    | Seq (stm1, stm2) -> (evalStmnt stm1 w s) |> (evalStmnt stm2 w)
+    | ITE (g, stm1, stm2) when (boolEval g w s) -> (evalStmnt stm1 w s) 
+    | ITE (_, stm1, stm2) -> (evalStmnt stm2 w s)
+    | While(g, stm) when (boolEval g w s) -> (evalStmnt stm w s) |> (evalStmnt (While(g,stm)) w)
+    | While _ -> s
 
-let stmnt2SquareFun stm = failwith "not imlpemented"
 
-let singleLetterScore : squareFun = stmnt2SquareFun (Ass ("_result_", arithSingleLetterScore))
-let doubleLetterScore : squareFun = stmnt2SquareFun (Ass ("_result_", arithDoubleLetterScore))
-let tripleLetterScore : squareFun = stmnt2SquareFun (Ass ("_result_", arithTripleLetterScore))
+    
+evalStmnt Skip [] Map.empty
+evalStmnt (Ass ("x", N 5)) [] Map.empty
+evalStmnt (Seq (Ass ("x", WL), Ass ("y", N 7))) hello Map.empty
+evalStmnt (ITE (WL .>=. N 5, Ass ("x", N 1), Ass ("x", N 2))) hello Map.empty
+evalStmnt (ITE (WL .<. N 5, Ass ("x", N 1), Ass ("x", N 2))) hello Map.empty
+evalStmnt (While (V "x" .<=. WL, Seq (Ass ("y", V "y" .+. V "x"),Ass ("x", V "x" .+. N 1)))) hello Map.empty
+evalStmnt (While (V "x" .<=. WL, Seq (Ass ("y", V "y" .+. V "x"), Ass ("x", V "x" .+. N 1)))) hello (Map.ofList [("x", 3); ("y", 100)])
 
-let doubleWordScore : squareFun = stmnt2SquareFun (Ass ("_result_", arithDoubleWordScore))
-let tripleWordScore : squareFun = stmnt2SquareFun (Ass ("_result_", arithTripleWordScore))
 
-let containsNumbers : squareFun = 
-    stmnt2SquareFun 
-        (Seq (Ass ("_result_", V "_acc_"),
-              While (V "i" .<. WL,
-                     ITE (IsDigit (CV (V "i")),
-                          Seq (Ass ("_result_", V "_result_" .*. N -1),
-                               Ass ("i", WL)),
-                          Ass ("i", V "i" .+. N 1)))))
+
+
+
+
+
+
+// let stmnt2SquareFun (stm: stmnt) : squareFun =
+//     fun w pos acc ->  snd (evalStmnt stm w (Map.ofList [("_pos_", pos); ("_acc_", acc)]))
+
+// let singleLetterScore : squareFun = stmnt2SquareFun (Ass ("_result_", arithSingleLetterScore))
+// let doubleLetterScore : squareFun = stmnt2SquareFun (Ass ("_result_", arithDoubleLetterScore))
+// let tripleLetterScore : squareFun = stmnt2SquareFun (Ass ("_result_", arithTripleLetterScore))
+
+// let doubleWordScore : squareFun = stmnt2SquareFun (Ass ("_result_", arithDoubleWordScore))
+// let tripleWordScore : squareFun = stmnt2SquareFun (Ass ("_result_", arithTripleWordScore))
+
+// let containsNumbers : squareFun = 
+//     stmnt2SquareFun 
+//         (Seq (Ass ("_result_", V "_acc_"),
+//               While (V "i" .<. WL,
+//                      ITE (IsDigit (CV (V "i")),
+//                           Seq (Ass ("_result_", V "_result_" .*. N -  1),
+//                                Ass ("i", WL)),
+//                           Ass ("i", V "i" .+. N 1)))))
                      
 
-type square2 = (int * stmnt) list
+// type square2 = (int * stmnt) list
 
-let SLS = [(0, Ass ("_result_", arithSingleLetterScore))]
-let DLS = [(0, Ass ("_result_", arithDoubleLetterScore))]
-let TLS = [(0, Ass ("_result_", arithTripleLetterScore))]
+// let SLS = [(0, Ass ("_result_", arithSingleLetterScore))]
+// let DLS = [(0, Ass ("_result_", arithDoubleLetterScore))]
+// let TLS = [(0, Ass ("_result_", arithTripleLetterScore))]
 
-let DWS = [(1, Ass ("_result_", arithDoubleWordScore))] @ SLS
-let TWS = [(1, Ass ("_result_", arithTripleWordScore))] @ SLS
+// let DWS = [(1, Ass ("_result_", arithDoubleWordScore))] @ SLS
+// let TWS = [(1, Ass ("_result_", arithTripleWordScore))] @ SLS
 
-let calculatePoints2 : square2 list -> word -> int = failwith "not implemented"
+// let calculatePoints2 : square2 list -> word -> int = failwith "not implemented"
