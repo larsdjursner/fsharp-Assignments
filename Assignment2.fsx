@@ -322,11 +322,11 @@ let calculatePoints (squaresList: list<Square>) (w: Word)  =
             elem |> List.map(fun x -> fst(x), snd(x) w i)
         )
         |> List.fold( List.append ) []
-        |> List.sortBy(fun elem -> fst(elem))
-        |> List.map(fun elem -> snd(elem))
-        |> List.fold ( >> ) id 
-        <| 0
+        // |> List.sortBy(fun elem -> fst(elem))
+        // |> List.map(fun elem -> snd(elem))
+        // |> List.fold ( >> ) id 
+        // <| 0
 
-// let list = calculatePoints2 [DLS; SLS; TLS; SLS; DWS] hello;;
+let list = calculatePoints [DLS; SLS; TLS; SLS; DWS] hello;;
 // (calculatePoints2 [DLS; SLS; TLS; (2, containsNumbers)::SLS; DWS] hello)
 // (calculatePoints [DLS; DWS; TLS; (2, containsNumbers)::TWS; DWS] (('4', 23)::hello))

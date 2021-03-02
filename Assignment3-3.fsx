@@ -45,15 +45,15 @@ let rec arithEval (a: aExp) (w:word) (s:state) =
     | Sub(a, b) -> (-) (arithEval a w s) (arithEval b w s)
     | Mul(a, b) ->  (arithEval a w s) * (arithEval b w s)
 
-arithEval WL [] Map.empty
-arithEval WL hello Map.empty
-arithEval (PV (N 0)) hello Map.empty
-arithEval (PV (N 1)) hello Map.empty
-arithEval arithSingleLetterScore hello (Map.ofList [("_pos_", 4); ("_acc_",0)])
-arithEval arithSingleLetterScore hello (Map.ofList [("_pos_", 4); ("_acc_",42)])
-arithEval arithDoubleLetterScore hello (Map.ofList [("_pos_", 4); ("_acc_",0)])
-arithEval arithDoubleLetterScore hello (Map.ofList [("_pos_", 4); ("_acc_",42)])
-arithEval arithTripleLetterScore hello (Map.ofList [("_pos_", 4); ("_acc_",0)])
+// arithEval WL [] Map.empty
+// arithEval WL hello Map.empty
+// arithEval (PV (N 0)) hello Map.empty
+// arithEval (PV (N 1)) hello Map.empty
+// arithEval arithSingleLetterScore hello (Map.ofList [("_pos_", 4); ("_acc_",0)])
+// arithEval arithSingleLetterScore hello (Map.ofList [("_pos_", 4); ("_acc_",42)])
+// arithEval arithDoubleLetterScore hello (Map.ofList [("_pos_", 4); ("_acc_",0)])
+// arithEval arithDoubleLetterScore hello (Map.ofList [("_pos_", 4); ("_acc_",42)])
+// arithEval arithTripleLetterScore hello (Map.ofList [("_pos_", 4); ("_acc_",0)])
 
 
 type cExp =
@@ -69,11 +69,11 @@ let rec charEval (c: cExp) (w: word) (s: state) =
     | ToLower c -> System.Char.ToLower(charEval c w s)
     | CV c -> fst(w.[arithEval c w s])
 
-charEval (C 'H') [] Map.empty
-charEval (ToLower (CV (N 0))) hello Map.empty
-charEval (ToUpper (C 'h')) [] Map.empty
-charEval (ToLower (C '*')) [] Map.empty
-charEval (CV (V "x" .-. N 1)) hello (Map.ofList [("x", 5)])
+// charEval (C 'H') [] Map.empty
+// charEval (ToLower (CV (N 0))) hello Map.empty
+// charEval (ToUpper (C 'h')) [] Map.empty
+// charEval (ToLower (C '*')) [] Map.empty
+// charEval (CV (V "x" .-. N 1)) hello (Map.ofList [("x", 5)])
 
 
 
@@ -114,14 +114,14 @@ let rec boolEval (b: bExp) (w: word) (s:state) =
     | IsDigit b -> System.Char.IsDigit(charEval b w s)
 
 
-boolEval TT [] Map.empty;;
-boolEval FF [] Map.empty;;
-boolEval ((V "x" .+. V "y") .=. (V "y" .+. V "x")) [] (Map.ofList [("x", 5); ("y", 7)]);
-boolEval ((V "x" .+. V "y") .=. (V "y" .-. V "x"))[] (Map.ofList [("x", 5); ("y", 7)]);;
-boolEval (IsLetter (CV (V "x"))) hello (Map.ofList [("x", 4)]);;
-boolEval (IsLetter (CV (V "x"))) (('1', 0)::hello) (Map.ofList [("x", 0)]);;
-boolEval (IsDigit (CV (V "x"))) hello (Map.ofList [("x", 4)]);;
-boolEval (IsDigit (CV (V "x"))) (('1', 0)::hello) (Map.ofList [("x", 0)]);;
+// boolEval TT [] Map.empty;;
+// boolEval FF [] Map.empty;;
+// boolEval ((V "x" .+. V "y") .=. (V "y" .+. V "x")) [] (Map.ofList [("x", 5); ("y", 7)]);
+// boolEval ((V "x" .+. V "y") .=. (V "y" .-. V "x"))[] (Map.ofList [("x", 5); ("y", 7)]);;
+// boolEval (IsLetter (CV (V "x"))) hello (Map.ofList [("x", 4)]);;
+// boolEval (IsLetter (CV (V "x"))) (('1', 0)::hello) (Map.ofList [("x", 0)]);;
+// boolEval (IsDigit (CV (V "x"))) hello (Map.ofList [("x", 4)]);;
+// boolEval (IsDigit (CV (V "x"))) (('1', 0)::hello) (Map.ofList [("x", 0)]);;
 
 
 type stmnt =
@@ -141,25 +141,88 @@ let rec evalStmnt (stm: stmnt) (w: word) (s: state) =
     | While(g, stm) when (boolEval g w s) -> (evalStmnt stm w s) |> (evalStmnt (While(g,stm)) w)
     | While _ -> s
 
-
     
-evalStmnt Skip [] Map.empty
-evalStmnt (Ass ("x", N 5)) [] Map.empty
-evalStmnt (Seq (Ass ("x", WL), Ass ("y", N 7))) hello Map.empty
-evalStmnt (ITE (WL .>=. N 5, Ass ("x", N 1), Ass ("x", N 2))) hello Map.empty
-evalStmnt (ITE (WL .<. N 5, Ass ("x", N 1), Ass ("x", N 2))) hello Map.empty
-evalStmnt (While (V "x" .<=. WL, Seq (Ass ("y", V "y" .+. V "x"),Ass ("x", V "x" .+. N 1)))) hello Map.empty
-evalStmnt (While (V "x" .<=. WL, Seq (Ass ("y", V "y" .+. V "x"), Ass ("x", V "x" .+. N 1)))) hello (Map.ofList [("x", 3); ("y", 100)])
+// evalStmnt Skip [] Map.empty
+// evalStmnt (Ass ("x", N 5)) [] Map.empty
+// evalStmnt (Seq (Ass ("x", WL), Ass ("y", N 7))) hello Map.empty
+// evalStmnt (ITE (WL .>=. N 5, Ass ("x", N 1), Ass ("x", N 2))) hello Map.empty
+// evalStmnt (ITE (WL .<. N 5, Ass ("x", N 1), Ass ("x", N 2))) hello Map.empty
+// evalStmnt (While (V "x" .<=. WL, Seq (Ass ("y", V "y" .+. V "x"),Ass ("x", V "x" .+. N 1)))) hello Map.empty
+// evalStmnt (While (V "x" .<=. WL, Seq (Ass ("y", V "y" .+. V "x"), Ass ("x", V "x" .+. N 1)))) hello (Map.ofList [("x", 3); ("y", 100)])
+
+
+       
+
+let stmnt2SquareFun stm =
+    fun w pos acc ->  (evalStmnt stm w (Map.ofList[("_pos_", pos); ("_acc_", acc)])).["_result_"]
+
+let singleLetterScore : squareFun = stmnt2SquareFun (Ass ("_result_", arithSingleLetterScore))
+let doubleLetterScore : squareFun = stmnt2SquareFun (Ass ("_result_", arithDoubleLetterScore))
+let tripleLetterScore : squareFun = stmnt2SquareFun (Ass ("_result_", arithTripleLetterScore))
+
+let doubleWordScore : squareFun = stmnt2SquareFun (Ass ("_result_", arithDoubleWordScore))
+let tripleWordScore : squareFun = stmnt2SquareFun (Ass ("_result_", arithTripleWordScore))
+
+let containsNumbers : squareFun = 
+    stmnt2SquareFun 
+        (Seq (Ass ("_result_", V "_acc_"),
+              While (V "i" .<. WL,
+                     ITE (IsDigit (CV (V "i")),
+                          Seq (Ass ("_result_", V "_result_" .*. N -1),
+                               Ass ("i", WL)),
+                          Ass ("i", V "i" .+. N 1)))))
+
+                 
+// singleLetterScore hello 0 0
+// doubleLetterScore hello 0 0
+// tripleLetterScore hello 0 0
+// singleLetterScore hello 0 42
+// doubleLetterScore hello 0 42
+// tripleLetterScore hello 0 42
+// containsNumbers hello 5 50
+// containsNumbers (('0', 100)::hello) 5 50
+// containsNumbers (hello @ [('0', 100)]) 5 50
+
+
+type square2 = (int * stmnt) list
+
+let SLS = [(0, Ass ("_result_", arithSingleLetterScore))]
+let DLS = [(0, Ass ("_result_", arithDoubleLetterScore))]
+let TLS = [(0, Ass ("_result_", arithTripleLetterScore))]
+
+let DWS = [(1, Ass ("_result_", arithDoubleWordScore))] @ SLS
+let TWS = [(1, Ass ("_result_", arithTripleWordScore))] @ SLS
+
+let calculatePoints2 (slist: list<square2>) (word: word) =
+    slist
+        |> List.mapi(fun i elem -> 
+            elem |> List.map(fun el -> (fst(el), stmnt2SquareFun (snd(el)) word i)))
+        |> List.fold( List.append ) []
+        |> List.sortBy(fun el -> fst(el))
+        |> List.map(fun elem -> snd(elem))
+        |> List.fold ( >> ) id 
+        <| 0
+
+// calculatePoints2 [DLS; SLS; TLS; SLS; DWS] hello;;
+// // val it : int = 28
+// calculatePoints2 [DLS; DWS; TLS; TWS; DWS] hello;;
+// // val it : int = 168
 
 
 
 
 
+
+
+
+
+
+//  scrap
 
 
 
 // let stmnt2SquareFun (stm: stmnt) : squareFun =
-//     fun w pos acc ->  snd (evalStmnt stm w (Map.ofList [("_pos_", pos); ("_acc_", acc)]))
+//     fun w pos acc ->  (evalStmnt stm w (Map.ofList[("_pos_", pos); ("_acc_", acc)])).["_result_"]
 
 // let singleLetterScore : squareFun = stmnt2SquareFun (Ass ("_result_", arithSingleLetterScore))
 // let doubleLetterScore : squareFun = stmnt2SquareFun (Ass ("_result_", arithDoubleLetterScore))
@@ -176,15 +239,5 @@ evalStmnt (While (V "x" .<=. WL, Seq (Ass ("y", V "y" .+. V "x"), Ass ("x", V "x
 //                           Seq (Ass ("_result_", V "_result_" .*. N -  1),
 //                                Ass ("i", WL)),
 //                           Ass ("i", V "i" .+. N 1)))))
-                     
 
-// type square2 = (int * stmnt) list
-
-// let SLS = [(0, Ass ("_result_", arithSingleLetterScore))]
-// let DLS = [(0, Ass ("_result_", arithDoubleLetterScore))]
-// let TLS = [(0, Ass ("_result_", arithTripleLetterScore))]
-
-// let DWS = [(1, Ass ("_result_", arithDoubleWordScore))] @ SLS
-// let TWS = [(1, Ass ("_result_", arithTripleWordScore))] @ SLS
-
-// let calculatePoints2 : square2 list -> word -> int = failwith "not implemented"
+// singleLetterScore hello 0 0;;

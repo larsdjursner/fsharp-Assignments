@@ -19,11 +19,11 @@ let (.*.) a b = Mul (a, b)
 //  = fun f x y s -> f (x s) (y s)
 
 
-let a1 = N 42
-let a2 = N 4 .+. (N 5 .-. N 6);;
-let a3 = N 4 .*. N 2 .+. N 34;;
-let a4 = (N 4 .+. N 2) .*. N 34;;
-let a5 = N 4 .+. (N 2 .*. N 34);;
+// let a1 = N 42
+// let a2 = N 4 .+. (N 5 .-. N 6);;
+// let a3 = N 4 .*. N 2 .+. N 34;;
+// let a4 = (N 4 .+. N 2) .*. N 34;;
+// let a5 = N 4 .+. (N 2 .*. N 34);;
 
 let rec arithEvalSimple aExp = 
     match aExp with
@@ -33,11 +33,11 @@ let rec arithEvalSimple aExp =
     | Mul(a, b) ->  (arithEvalSimple a) * (arithEvalSimple b)
 
 
-arithEvalSimple a1
-arithEvalSimple a2
-arithEvalSimple a3
-arithEvalSimple a4
-arithEvalSimple a5
+// arithEvalSimple a1
+// arithEvalSimple a2
+// arithEvalSimple a3
+// arithEvalSimple a4
+// arithEvalSimple a5
 
 
 

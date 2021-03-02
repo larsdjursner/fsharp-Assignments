@@ -22,10 +22,10 @@ let rec arithEvalState (aExp: aExp) (s:state) =
     | Mul(a, b) ->  (arithEvalState a s) * (arithEvalState b s)
 
 
-let a6 = V "x";;
-let a7 = N 4 .+. (V "y" .-. V "z");;
+// let a6 = V "x";;
+// let a7 = N 4 .+. (V "y" .-. V "z");;
 
-arithEvalState a6 (Map.ofList [("x", 5)]);;
-arithEvalState a6 (Map.ofList [("y", 5)]);;
-arithEvalState a7 (Map.ofList [("x", 4); ("y", 5)]);;
-arithEvalState a7 (Map.ofList [("y", 4); ("z", 5)]);;
+// arithEvalState a6 (Map.ofList [("x", 5)]);;
+// arithEvalState a6 (Map.ofList [("y", 5)]);;
+// arithEvalState a7 (Map.ofList [("x", 4); ("y", 5)]);;
+// arithEvalState a7 (Map.ofList [("y", 4); ("z", 5)]);;
